@@ -3,257 +3,260 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Run Performance Dashboard (Dec 2025 - Feb 2026)</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <title>3D Running Dashboard</title>
   <style>
     :root {
-      --bg: #0b1220;
-      --panel: #131c2f;
-      --panel-border: #283755;
-      --text: #e5ecf5;
-      --muted: #9fb0c8;
+      --bg: #070d1a;
+      --panel: #101a2c;
+      --panel-border: #243652;
+      --text: #e7eef9;
+      --muted: #97abc8;
       --accent: #5ac8fa;
-      --accent2: #7ef29a;
-      --accent3: #f6b26b;
-      --accent4: #ff7b7b;
     }
     * { box-sizing: border-box; }
     body {
       margin: 0;
-      font-family: Inter, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-      background: linear-gradient(180deg, #070d1a 0%, var(--bg) 100%);
+      font-family: Inter, Segoe UI, Roboto, Arial, sans-serif;
       color: var(--text);
+      background: radial-gradient(circle at top, #101a2d, var(--bg));
     }
     .container {
-      max-width: 1180px;
+      max-width: 1280px;
       margin: 0 auto;
-      padding: 2rem 1rem 4rem;
+      padding: 1.2rem;
+      display: grid;
+      gap: 1rem;
     }
     h1 {
       margin: 0;
-      font-size: clamp(1.5rem, 3vw, 2.2rem);
-      letter-spacing: .01em;
+      font-size: clamp(1.4rem, 2.8vw, 2rem);
     }
-    p.sub {
-      margin: .5rem 0 1.5rem;
+    .sub {
+      margin: .35rem 0 0;
       color: var(--muted);
     }
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: .9rem;
-      margin-bottom: 1.2rem;
+      gap: .8rem;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
     }
     .card {
-      background: rgba(19, 28, 47, .92);
+      background: rgba(16, 26, 44, .92);
       border: 1px solid var(--panel-border);
-      border-radius: 14px;
-      padding: .9rem 1rem;
+      border-radius: 12px;
+      padding: .8rem .9rem;
     }
-    .card .label {
-      font-size: .82rem;
-      color: var(--muted);
-      margin-bottom: .25rem;
-    }
-    .card .value {
-      font-size: 1.4rem;
-      font-weight: 700;
-    }
-    .chart-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 1rem;
-    }
+    .label { color: var(--muted); font-size: .82rem; }
+    .value { font-size: 1.35rem; font-weight: 700; margin-top: .2rem; }
     .panel {
-      background: rgba(19, 28, 47, .92);
+      background: rgba(16, 26, 44, .92);
       border: 1px solid var(--panel-border);
-      border-radius: 14px;
-      padding: .9rem;
+      border-radius: 12px;
+      overflow: hidden;
     }
-    .panel h2 {
-      margin: .2rem .2rem 1rem;
-      font-size: 1rem;
+    .panel-head {
+      padding: .8rem .9rem;
+      border-bottom: 1px solid var(--panel-border);
       color: var(--muted);
-      font-weight: 600;
     }
-    canvas {
-      width: 100% !important;
-      max-height: 340px;
+    #sceneWrap {
+      position: relative;
+      height: min(70vh, 760px);
+      min-height: 420px;
     }
-    table {
-      width: 100%;
-      border-collapse: collapse;
+    #scene { width: 100%; height: 100%; display: block; }
+    .legend {
+      position: absolute;
+      left: .8rem;
+      top: .8rem;
+      background: rgba(7, 13, 26, .75);
+      border: 1px solid #264063;
+      border-radius: 10px;
+      padding: .55rem .65rem;
+      font-size: .8rem;
+      line-height: 1.35;
+    }
+    .legend span {
+      width: .75rem;
+      height: .75rem;
+      border-radius: 999px;
+      display: inline-block;
+      margin-right: .35rem;
+      vertical-align: middle;
+    }
+    .hint {
+      margin: .6rem .9rem 0;
+      color: var(--muted);
+      font-size: .85rem;
+    }
+    .details {
+      margin: .8rem .9rem .9rem;
+      border: 1px dashed #32517a;
+      border-radius: 8px;
+      padding: .65rem;
       font-size: .9rem;
-    }
-    th, td {
-      text-align: left;
-      padding: .5rem .35rem;
-      border-bottom: 1px solid #243250;
-      white-space: nowrap;
-    }
-    th { color: #bdd1ee; font-weight: 600; }
-    td { color: #e5ecf5; }
-    @media (min-width: 900px) {
-      .chart-grid {
-        grid-template-columns: 1fr 1fr;
-      }
-      .panel.full {
-        grid-column: 1 / -1;
-      }
+      background: rgba(8, 15, 26, .5);
     }
   </style>
 </head>
 <body>
   <main class="container">
-    <h1>Running Performance Dashboard</h1>
-    <p class="sub">Data range: 2025-12-08 to 2026-02-15 (33 runs). Goal weight projection included for 165 lbs.</p>
+    <section>
+      <h1>3D Running Dashboard</h1>
+      <p class="sub">3D model view of your run progression (Dec 2025 → Feb 2026).</p>
+    </section>
 
     <section class="grid" id="summary"></section>
 
-    <section class="chart-grid">
-      <article class="panel">
-        <h2>Distance & Duration Trend</h2>
-        <canvas id="distanceDuration"></canvas>
-      </article>
-      <article class="panel">
-        <h2>Heart Rate Trends</h2>
-        <canvas id="heartMetrics"></canvas>
-      </article>
-      <article class="panel">
-        <h2>Calories Burned</h2>
-        <canvas id="calories"></canvas>
-      </article>
-      <article class="panel">
-        <h2>Weight Trend</h2>
-        <canvas id="weight"></canvas>
-      </article>
-      <article class="panel full">
-        <h2>Data Table</h2>
-        <div style="overflow-x:auto;">
-          <table>
-            <thead>
-              <tr>
-                <th>Date</th><th>Distance</th><th>Duration</th><th>Calories</th><th>Working HR</th><th>HR Recovery</th><th>Resting HR</th><th>Weight</th>
-              </tr>
-            </thead>
-            <tbody id="rows"></tbody>
-          </table>
+    <section class="panel">
+      <div class="panel-head">3D model (X: run sequence, Y: distance, Z: working HR, bar height: calories, bar color: weight)</div>
+      <div id="sceneWrap">
+        <canvas id="scene"></canvas>
+        <div class="legend">
+          <div><span style="background:#5ac8fa"></span>Run path (distance/HR)</div>
+          <div><span style="background:#7ef29a"></span>Lower weight</div>
+          <div><span style="background:#ff7b7b"></span>Higher weight</div>
+          <div><span style="background:#f6b26b"></span>Calories bar</div>
         </div>
-      </article>
+      </div>
+      <p class="hint">Drag to rotate, scroll to zoom, right-click drag to pan. Click a sphere for details.</p>
+      <div class="details" id="details">Click a run marker to inspect the run details.</div>
     </section>
   </main>
 
-  <script>
+  <script type="module">
+    import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
+    import { OrbitControls } from 'https://unpkg.com/three@0.160.0/examples/jsm/controls/OrbitControls.js';
+
     const runs = [
       ["2025-12-08",5,88,0,527,124,96,80,231],["2025-12-09",5,85,0,560,120,95,80,229],["2025-12-12",2,20,0,240,126,90,79,230],["2025-12-14",5,84,0,565,145,92,80,227],["2025-12-15",5,82,0,579,120,90,79,225],["2025-12-19",6,96,0,647,139,90,78,224],["2025-12-22",6,95,0,680,140,90,75,222],["2025-12-26",2,20,0,210,125,89,75,219],["2025-12-29",5,84,0,550,130,89,75,217],["2025-12-31",5,84,0,504,127,89,74,215],
       ["2026-01-05",2,21,0,225,135,87,74,217],["2026-01-07",2,26,0,272,110,87,74,216],["2026-01-08",2,26,0,265,120,86,74,215],["2026-01-14",2,25,0,234,115,85,72,213],["2026-01-15",5,75,0,600,130,83,70,211],["2026-01-16",8,120,0,953,125,80,70,210],["2026-01-18",6,80,0,587,120,80,70,209],["2026-01-19",5,71,0,624,140,75,65,208],["2026-01-20",5,73,0,615,145,75,62,208],["2026-01-26",5,71,0,635,164,70,60,207],["2026-01-27",2,27,0,295,172,72,61,206],["2026-01-28",2,31,0,313,122,72,62,208],["2026-01-30",10,150,0,1323,140,83,60,208],["2026-02-02",8,122,0,900,130,75,60,207],["2026-02-03",6,75,0,620,135,72,60,206],["2026-02-05",5,54,0,832,167,69,60,204],["2026-02-07",5,50,0,723,133,91,60,204],["2026-02-09",5,50,0,741,125,89,59,203],["2026-02-10",5,50,0,746,180,88,59,203],["2026-02-10",5,48,0,760,123,88,59,199],["2026-02-11",5,50,0,731,173,87,58,198],["2026-02-14",10,144,0,1452,133,86,57,197],["2026-02-15",10,139,0,1414,140,84,58,196]
     ];
 
-    const GOAL_WEIGHT = 165;
-    const labels = runs.map(r => r[0]);
     const sum = (idx) => runs.reduce((t, r) => t + r[idx], 0);
     const avg = (idx) => sum(idx) / runs.length;
-
-    const firstDate = new Date(runs[0][0]);
-    const lastDate = new Date(runs[runs.length - 1][0]);
     const firstWeight = runs[0][8];
     const currentWeight = runs[runs.length - 1][8];
-    const elapsedDays = Math.max(1, Math.round((lastDate - firstDate) / (1000 * 60 * 60 * 24)));
-    const netLoss = firstWeight - currentWeight;
-    const lossPerDay = netLoss > 0 ? netLoss / elapsedDays : 0;
-
-    const formatDate = (d) => {
-      const y = d.getFullYear();
-      const m = String(d.getMonth() + 1).padStart(2, '0');
-      const day = String(d.getDate()).padStart(2, '0');
-      return `${y}-${m}-${day}`;
-    };
-
-    let goalTimeframeLabel = 'Insufficient downward trend';
-    if (lossPerDay > 0 && currentWeight > GOAL_WEIGHT) {
-      const lbsRemaining = currentWeight - GOAL_WEIGHT;
-      const daysToGoal = Math.ceil(lbsRemaining / lossPerDay);
-      const projectedGoalDate = new Date(lastDate);
-      projectedGoalDate.setDate(projectedGoalDate.getDate() + daysToGoal);
-      const weeksToGoal = (daysToGoal / 7).toFixed(1);
-      goalTimeframeLabel = `${daysToGoal} days (~${weeksToGoal} wks), target ${formatDate(projectedGoalDate)}`;
-    } else if (currentWeight <= GOAL_WEIGHT) {
-      goalTimeframeLabel = `Goal reached (${currentWeight} lbs)`;
-    }
+    const firstDate = new Date(runs[0][0]);
+    const lastDate = new Date(runs[runs.length - 1][0]);
+    const elapsedDays = Math.max(1, Math.round((lastDate - firstDate) / 86400000));
+    const lossPerDay = Math.max(0, (firstWeight - currentWeight) / elapsedDays);
+    const daysTo165 = lossPerDay > 0 ? Math.ceil((currentWeight - 165) / lossPerDay) : null;
 
     const summaryData = [
-      ["Total Distance", `${sum(1).toFixed(0)} mi`],
-      ["Total Duration", `${sum(2).toFixed(0)} min`],
-      ["Avg Distance / Run", `${avg(1).toFixed(1)} mi`],
-      ["Avg Working HR", `${avg(5).toFixed(0)} bpm`],
-      ["Resting HR Change", `${runs[0][7]} → ${runs[runs.length - 1][7]} bpm`],
-      ["Weight Change", `${firstWeight} → ${currentWeight} lbs`],
-      ["Time to 165 lbs", goalTimeframeLabel],
+      ['Runs', `${runs.length}`],
+      ['Total Distance', `${sum(1)} mi`],
+      ['Avg Distance', `${avg(1).toFixed(1)} mi`],
+      ['Avg Working HR', `${avg(5).toFixed(0)} bpm`],
+      ['Weight Change', `${firstWeight} → ${currentWeight} lbs`],
+      ['Time to 165 lbs', daysTo165 && daysTo165 > 0 ? `${daysTo165} days` : 'Already at/under goal or flat trend']
     ];
 
     const summary = document.getElementById('summary');
     summaryData.forEach(([label, value]) => {
-      const el = document.createElement('div');
-      el.className = 'card';
-      el.innerHTML = `<div class="label">${label}</div><div class="value">${value}</div>`;
-      summary.appendChild(el);
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = `<div class="label">${label}</div><div class="value">${value}</div>`;
+      summary.appendChild(card);
     });
 
-    document.getElementById('rows').innerHTML = runs.map(r =>
-      `<tr><td>${r[0]}</td><td>${r[1]} mi</td><td>${r[2]} min</td><td>${r[4]}</td><td>${r[5]}</td><td>${r[6]} sec</td><td>${r[7]}</td><td>${r[8]} lb</td></tr>`
-    ).join('');
+    const canvas = document.getElementById('scene');
+    const details = document.getElementById('details');
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x0a1322);
 
-    const baseOpts = {
-      responsive: true,
-      plugins: { legend: { labels: { color: '#d8e6f9' } } },
-      scales: {
-        x: { ticks: { color: '#b8c9df', maxRotation: 70, minRotation: 50 }, grid: { color: '#22304e' } },
-        y: { ticks: { color: '#b8c9df' }, grid: { color: '#22304e' } }
-      }
+    const camera = new THREE.PerspectiveCamera(55, 1, 0.1, 1000);
+    camera.position.set(35, 30, 40);
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.target.set(16, 6, 10);
+
+    const hemi = new THREE.HemisphereLight(0x9fc7ff, 0x1a2e45, 0.95);
+    const dir = new THREE.DirectionalLight(0xffffff, 1.1);
+    dir.position.set(24, 35, 18);
+    scene.add(hemi, dir);
+
+    const grid = new THREE.GridHelper(90, 18, 0x3d5677, 0x2a3d5a);
+    scene.add(grid);
+
+    const points = [];
+    const markers = [];
+    const group = new THREE.Group();
+    scene.add(group);
+
+    const minW = Math.min(...runs.map(r => r[8]));
+    const maxW = Math.max(...runs.map(r => r[8]));
+    const weightColor = (w) => {
+      const t = (w - minW) / (maxW - minW || 1);
+      return new THREE.Color().setHSL(0.35 - (0.35 * t), 0.72, 0.56);
     };
 
-    new Chart(document.getElementById('distanceDuration'), {
-      type: 'line',
-      data: {
-        labels,
-        datasets: [
-          { label: 'Distance (mi)', data: runs.map(r => r[1]), borderColor: '#5ac8fa', backgroundColor: 'rgba(90,200,250,.25)', tension: .25 },
-          { label: 'Duration (min)', data: runs.map(r => r[2]), borderColor: '#7ef29a', backgroundColor: 'rgba(126,242,154,.2)', tension: .25 }
-        ]
-      },
-      options: baseOpts
+    runs.forEach((r, i) => {
+      const x = i * 1.8;
+      const y = r[1] * 1.2;
+      const z = (r[5] - 100) * 0.45;
+      points.push(new THREE.Vector3(x, y, z));
+
+      const barHeight = r[4] / 120;
+      const bar = new THREE.Mesh(
+        new THREE.BoxGeometry(1.05, barHeight, 1.05),
+        new THREE.MeshStandardMaterial({ color: 0xf6b26b, roughness: .5, metalness: .2 })
+      );
+      bar.position.set(x, barHeight / 2, z);
+      group.add(bar);
+
+      const marker = new THREE.Mesh(
+        new THREE.SphereGeometry(0.45, 22, 22),
+        new THREE.MeshStandardMaterial({ color: weightColor(r[8]), emissive: 0x0c1220, roughness: .3 })
+      );
+      marker.position.set(x, y, z);
+      marker.userData.run = r;
+      group.add(marker);
+      markers.push(marker);
     });
 
-    new Chart(document.getElementById('heartMetrics'), {
-      type: 'line',
-      data: {
-        labels,
-        datasets: [
-          { label: 'Working HR', data: runs.map(r => r[5]), borderColor: '#f6b26b', tension: .25 },
-          { label: 'HR Recovery (sec)', data: runs.map(r => r[6]), borderColor: '#c58bff', tension: .25 },
-          { label: 'Resting HR', data: runs.map(r => r[7]), borderColor: '#ff7b7b', tension: .25 }
-        ]
-      },
-      options: baseOpts
+    const path = new THREE.Line(
+      new THREE.BufferGeometry().setFromPoints(points),
+      new THREE.LineBasicMaterial({ color: 0x5ac8fa })
+    );
+    scene.add(path);
+
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+    const setDetails = (run) => {
+      details.innerHTML = `<strong>${run[0]}</strong><br>Distance: ${run[1]} mi | Duration: ${run[2]} min | Calories: ${run[4]}<br>Working HR: ${run[5]} bpm | HR Recovery: ${run[6]} sec | Resting HR: ${run[7]} bpm | Weight: ${run[8]} lbs`;
+    };
+
+    renderer.domElement.addEventListener('click', (event) => {
+      const rect = renderer.domElement.getBoundingClientRect();
+      mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+      mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+      raycaster.setFromCamera(mouse, camera);
+      const hit = raycaster.intersectObjects(markers, false)[0];
+      if (hit) setDetails(hit.object.userData.run);
     });
 
-    new Chart(document.getElementById('calories'), {
-      type: 'bar',
-      data: {
-        labels,
-        datasets: [{ label: 'Calories', data: runs.map(r => r[4]), backgroundColor: 'rgba(90,200,250,.7)', borderColor: '#5ac8fa' }]
-      },
-      options: baseOpts
-    });
+    const resize = () => {
+      const wrap = document.getElementById('sceneWrap');
+      const w = wrap.clientWidth;
+      const h = wrap.clientHeight;
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h, false);
+    };
 
-    new Chart(document.getElementById('weight'), {
-      type: 'line',
-      data: {
-        labels,
-        datasets: [{ label: 'Weight (lb)', data: runs.map(r => r[8]), borderColor: '#7ef29a', backgroundColor: 'rgba(126,242,154,.18)', fill: true, tension: .25 }]
-      },
-      options: baseOpts
-    });
+    window.addEventListener('resize', resize);
+    resize();
+
+    const animate = () => {
+      controls.update();
+      renderer.render(scene, camera);
+      requestAnimationFrame(animate);
+    };
+    animate();
   </script>
 </body>
 </html>
