@@ -112,10 +112,6 @@
 
     <section class="chart-grid">
       <article class="panel">
-        <h2>Distance & Duration Trend</h2>
-        <canvas id="distanceDuration"></canvas>
-      </article>
-      <article class="panel">
         <h2>Heart Rate Trends</h2>
         <canvas id="heartMetrics"></canvas>
       </article>
@@ -211,18 +207,6 @@
         y: { ticks: { color: '#b8c9df' }, grid: { color: '#22304e' } }
       }
     };
-
-    new Chart(document.getElementById('distanceDuration'), {
-      type: 'line',
-      data: {
-        labels,
-        datasets: [
-          { label: 'Distance (mi)', data: runs.map(r => r[1]), borderColor: '#5ac8fa', backgroundColor: 'rgba(90,200,250,.25)', tension: .25 },
-          { label: 'Duration (min)', data: runs.map(r => r[2]), borderColor: '#7ef29a', backgroundColor: 'rgba(126,242,154,.2)', tension: .25 }
-        ]
-      },
-      options: baseOpts
-    });
 
     new Chart(document.getElementById('heartMetrics'), {
       type: 'line',
